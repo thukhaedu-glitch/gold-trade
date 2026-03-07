@@ -3,88 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gold Trade Pro - Optimized Build</title>
+    <title>Gold Trade Pro - Elite v2.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         .tab-content { display: none; content-visibility: auto; }
         .tab-content.active { display: block; }
-        .nav-active { color: #fbbf24; transform: translateY(-3px); }
-        input { background: #111827 !important; border: 1px solid #374151 !important; color: white !important; }
-        #app-screen { display: none; }
-        .fade-in { animation: fadeIn 0.3s ease-in; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .nav-active { color: #fbbf24; transform: translateY(-3px); transition: all 0.3s ease; }
+        input, select { background: #111827 !important; border: 1px solid #374151 !important; color: white !important; }
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="bg-[#0b0f1a] text-white font-sans overflow-x-hidden">
 
     <div id="auth-screen" class="fixed inset-0 z-[100] bg-[#0b0f1a] flex items-center justify-center p-6">
         <div class="w-full max-w-sm p-8 rounded-3xl bg-gray-900 border border-gray-800 shadow-2xl">
-            <h1 class="text-3xl font-black text-yellow-500 text-center mb-8 italic">GOLD.TRADER</h1>
+            <h1 class="text-3xl font-black text-yellow-500 text-center mb-8 italic tracking-tighter">GOLD.TRADER</h1>
             <div class="space-y-4">
                 <input type="email" id="auth-email" placeholder="Email" class="w-full p-4 rounded-xl outline-none focus:border-yellow-500">
                 <input type="password" id="auth-pass" placeholder="Password" class="w-full p-4 rounded-xl outline-none focus:border-yellow-500">
                 <button onclick="handleAuth('login')" class="w-full bg-yellow-500 text-black font-bold py-4 rounded-xl active:scale-95 transition">LOGIN</button>
-                <button onclick="handleAuth('signup')" class="w-full text-gray-500 text-sm py-2">Create new account</button>
+                <button onclick="handleAuth('signup')" class="w-full text-gray-500 text-sm py-2 block mx-auto">Create account</button>
             </div>
-            <p id="auth-error" class="text-red-500 text-xs mt-4 text-center"></p>
+            <p id="auth-error" class="text-red-500 text-[10px] mt-4 text-center font-bold uppercase"></p>
         </div>
     </div>
 
-    <div id="app-screen" class="fade-in">
-        <header class="p-4 sticky top-0 bg-[#0b0f1a]/80 backdrop-blur-md z-40 border-b border-gray-800">
+    <div id="app-screen" class="fade-in" style="display: none;">
+        <header class="p-4 sticky top-0 bg-[#0b0f1a]/90 backdrop-blur-md z-40 border-b border-gray-800">
             <div class="max-w-md mx-auto flex justify-between items-center">
                 <div class="flex flex-col">
-                    <span class="text-[10px] text-gray-500 font-bold uppercase">Live Price</span>
-                    <span class="text-yellow-500 font-black text-xl font-mono"><span id="current-price-header">0.00</span> <small class="text-xs">AED</small></span>
+                    <span class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Live Price (AED)</span>
+                    <span class="text-yellow-500 font-black text-2xl font-mono" id="current-price-header">0.00</span>
                 </div>
-                <button onclick="handleAuth('logout')" class="text-[10px] bg-gray-800 px-4 py-2 rounded-full font-bold">LOGOUT</button>
+                <button onclick="handleAuth('logout')" class="text-[10px] bg-red-900/20 text-red-500 border border-red-900/50 px-4 py-2 rounded-full font-bold">LOGOUT</button>
             </div>
         </header>
 
-        <main class="max-w-md mx-auto p-4 pb-28">
+        <main class="max-w-md mx-auto p-4 pb-32">
+            
             <section id="buy" class="tab-content active space-y-4">
-                <div class="bg-gray-900 p-6 rounded-2xl border border-gray-800">
-                    <h2 class="font-bold mb-4 flex items-center gap-2"><i class="fas fa-plus-circle text-green-500"></i> New Order</h2>
-                    <input type="number" id="buy-xau" placeholder="Amount (XAU)" oninput="convertGold()" class="w-full p-4 rounded-xl mb-4 font-mono outline-none">
-                    <div class="text-right text-[10px] text-gray-500 mb-4 uppercase font-bold">≈ <span id="buy-gram" class="text-yellow-500">0.0000</span> Grams</div>
-                    <label class="text-[10px] text-gray-500 font-bold uppercase ml-1">Manual Date (Optional)</label>
-                    <input type="datetime-local" id="buy-date" class="w-full p-3 rounded-xl mb-6">
-                    <button onclick="recordTrade(this)" class="w-full bg-yellow-500 text-black font-black py-4 rounded-xl active:scale-95 transition">CONFIRM PURCHASE</button>
+                <div class="bg-gray-900 p-6 rounded-3xl border border-gray-800 shadow-xl">
+                    <div class="flex gap-2 mb-6 p-1 bg-black rounded-2xl">
+                        <button id="mode-buy" onclick="setTradeMode('buy')" class="flex-1 py-3 rounded-xl font-black text-sm bg-green-600 text-white">BUY</button>
+                        <button id="mode-sell" onclick="setTradeMode('sell')" class="flex-1 py-3 rounded-xl font-black text-sm text-gray-500">SELL</button>
+                    </div>
+                    <input type="number" id="trade-xau" placeholder="Amount (XAU)" oninput="convertGold()" class="w-full p-4 rounded-xl mb-2 text-xl font-mono outline-none">
+                    <div class="text-right text-[11px] text-gray-500 mb-6 font-bold uppercase">≈ <span id="buy-gram" class="text-yellow-500">0.0000</span> Grams</div>
+                    <label class="text-[10px] text-gray-500 font-black uppercase ml-1">Manual Date (Optional)</label>
+                    <input type="datetime-local" id="trade-date" class="w-full p-4 rounded-xl mb-6 text-sm">
+                    <button id="trade-btn" onclick="recordTrade(this)" class="w-full bg-green-600 text-white font-black py-4 rounded-2xl">CONFIRM PURCHASE</button>
                 </div>
             </section>
 
             <section id="sold" class="tab-content space-y-4">
-                <h2 class="font-bold px-1 flex justify-between"><span>Trade History</span> <i class="fas fa-history text-gray-700"></i></h2>
+                <h2 class="font-black text-lg uppercase px-1">Trade History</h2>
                 <div id="sold-list" class="space-y-3"></div>
             </section>
 
             <section id="wallet" class="tab-content space-y-6">
-                <div class="bg-gradient-to-tr from-yellow-600 to-yellow-400 p-8 rounded-[2rem] shadow-lg text-black">
-                    <p class="text-[10px] uppercase font-bold opacity-70 tracking-widest">Available Balance</p>
+                <div class="bg-gradient-to-br from-yellow-500 to-yellow-700 p-8 rounded-[2rem] shadow-2xl text-black">
+                    <p class="text-[10px] uppercase font-black opacity-60">Balance</p>
                     <h2 id="wallet-total-xau" class="text-4xl font-black mt-1">0.0000 XAU</h2>
-                    <p id="wallet-total-gram" class="font-bold opacity-80 font-mono mt-1">0.00 g</p>
+                    <p id="wallet-total-gram" class="font-bold opacity-70 font-mono">0.00 g</p>
                 </div>
-                <div id="profit-calc" class="bg-gray-900 p-6 rounded-2xl border border-gray-800 shadow-xl"></div>
-                <div class="bg-gray-900 p-4 rounded-2xl border border-gray-800 h-64">
-                    <canvas id="marketChart"></canvas>
+
+                <div id="profit-calc" class="bg-gray-900 p-6 rounded-3xl border border-gray-800 shadow-xl"></div>
+
+                <div class="bg-gray-900 p-4 rounded-3xl border border-gray-800">
+                    <div class="flex gap-1 overflow-x-auto pb-4 no-scrollbar" id="filter-container">
+                        <button onclick="updateFilter('1d', this)" class="filter-btn px-4 py-2 text-[10px] bg-yellow-500 text-black rounded-xl font-black">1D</button>
+                        <button onclick="updateFilter('7d', this)" class="filter-btn px-4 py-2 text-[10px] bg-gray-800 text-gray-400 rounded-xl font-black">7D</button>
+                        <button onclick="updateFilter('1m', this)" class="filter-btn px-4 py-2 text-[10px] bg-gray-800 text-gray-400 rounded-xl font-black">1M</button>
+                        <button onclick="updateFilter('1y', this)" class="filter-btn px-4 py-2 text-[10px] bg-gray-800 text-gray-400 rounded-xl font-black">1Y</button>
+                        <button onclick="toggleCustomDate()" class="filter-btn px-4 py-2 text-[10px] bg-gray-800 text-gray-400 rounded-xl font-black uppercase">Range</button>
+                    </div>
+
+                    <div id="custom-date-box" class="hidden grid grid-cols-2 gap-2 mb-4 p-3 bg-black/50 rounded-xl border border-gray-800">
+                        <input type="date" id="start-date" class="p-2 text-[10px] rounded-lg">
+                        <input type="date" id="end-date" class="p-2 text-[10px] rounded-lg">
+                        <button onclick="applyCustomFilter()" class="col-span-2 bg-blue-600 py-2 rounded-lg text-[10px] font-black uppercase">Apply Custom Filter</button>
+                    </div>
+
+                    <div class="h-64"><canvas id="marketChart"></canvas></div>
                 </div>
             </section>
 
             <section id="price" class="tab-content space-y-4">
-                <div class="bg-gray-900 p-6 rounded-2xl border border-gray-800 shadow-xl">
-                    <h2 class="font-bold mb-4">Update Market Price</h2>
+                <div class="bg-gray-900 p-6 rounded-3xl border border-gray-800">
+                    <h2 class="font-bold mb-4 uppercase text-xs text-gray-500">Price Update</h2>
                     <input type="number" id="new-price" placeholder="1 XAU = ? AED" class="w-full p-4 rounded-xl mb-4 font-mono outline-none">
-                    <label class="text-[10px] text-gray-500 font-bold uppercase ml-1">Price Effective Date</label>
-                    <input type="datetime-local" id="price-date" class="w-full p-3 rounded-xl mb-6">
-                    <button onclick="updatePrice(this)" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl active:scale-95 transition">UPDATE PRICE</button>
+                    <input type="datetime-local" id="price-date" class="w-full p-4 rounded-xl mb-6 text-sm">
+                    <button onclick="updatePrice(this)" class="w-full bg-blue-600 text-white font-black py-4 rounded-xl">UPDATE PRICE</button>
                 </div>
                 <div id="price-history-list" class="space-y-2"></div>
             </section>
         </main>
 
-        <nav class="fixed bottom-0 w-full bg-black/90 backdrop-blur-xl border-t border-gray-800 p-4 flex justify-around items-center">
+        <nav class="fixed bottom-0 w-full bg-black/90 backdrop-blur-xl border-t border-gray-800 p-4 flex justify-around items-center z-50">
             <button onclick="showTab('buy')" class="nav-btn nav-active" id="btn-buy"><i class="fas fa-plus-square text-2xl"></i></button>
             <button onclick="showTab('sold')" class="nav-btn" id="btn-sold"><i class="fas fa-history text-2xl"></i></button>
             <button onclick="showTab('wallet')" class="nav-btn" id="btn-wallet"><i class="fas fa-wallet text-2xl"></i></button>
@@ -95,7 +115,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, query, orderBy, onSnapshot, limit, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, doc, deleteDoc, query, orderBy, onSnapshot, limit, serverTimestamp, Timestamp, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyB0NhhEe1Sgww1NNfD-Z2lPPERPddchBok",
@@ -110,9 +130,9 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         const XAU_TO_GRAM = 31.1035;
-        let currentPrice = 0, chart;
+        let currentPrice = 0, chart, tradeMode = 'buy', priceUnsub = null;
 
-        // AUTH HANDLER
+        // --- AUTH ---
         window.handleAuth = async (type) => {
             const email = document.getElementById('auth-email').value;
             const pass = document.getElementById('auth-pass').value;
@@ -124,17 +144,17 @@
         };
 
         onAuthStateChanged(auth, (user) => {
-            const appScr = document.getElementById('app-screen');
-            const authScr = document.getElementById('auth-screen');
             if (user) {
-                authScr.style.display = 'none'; appScr.style.display = 'block';
-                initRealtime();
+                document.getElementById('auth-screen').style.display = 'none';
+                document.getElementById('app-screen').style.display = 'block';
+                initData();
             } else {
-                authScr.style.display = 'flex'; appScr.style.display = 'none';
+                document.getElementById('auth-screen').style.display = 'flex';
+                document.getElementById('app-screen').style.display = 'none';
             }
         });
 
-        // TABS
+        // --- NAVIGATION ---
         window.showTab = (id) => {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('nav-active'));
@@ -142,135 +162,124 @@
             document.getElementById('btn-'+id).classList.add('nav-active');
         };
 
-        // PRICE UPDATE (MANUAL SUPPORT)
-        window.updatePrice = async (btn) => {
-            const pInput = document.getElementById('new-price');
-            const dInput = document.getElementById('price-date');
-            const val = parseFloat(pInput.value);
-            if(!val) return alert("Enter price!");
-
-            btn.disabled = true; btn.innerText = "UPDATING...";
-            try {
-                await addDoc(collection(db, "prices"), {
-                    price: val,
-                    timestamp: dInput.value ? Timestamp.fromDate(new Date(dInput.value)) : serverTimestamp()
-                });
-                pInput.value = ''; dInput.value = '';
-            } catch (e) { alert(e.message); }
-            btn.disabled = false; btn.innerText = "UPDATE PRICE";
+        window.setTradeMode = (mode) => {
+            tradeMode = mode;
+            const isBuy = mode === 'buy';
+            document.getElementById('mode-buy').className = `flex-1 py-3 rounded-xl font-black text-sm ${isBuy ? 'bg-green-600 text-white' : 'text-gray-500'}`;
+            document.getElementById('mode-sell').className = `flex-1 py-3 rounded-xl font-black text-sm ${!isBuy ? 'bg-red-600 text-white' : 'text-gray-500'}`;
+            document.getElementById('trade-btn').innerText = isBuy ? "CONFIRM PURCHASE" : "CONFIRM SALE";
+            document.getElementById('trade-btn').className = `w-full ${isBuy ? 'bg-green-600' : 'bg-red-600'} text-white font-black py-4 rounded-2xl`;
         };
 
-        // RECORD TRADE
-        window.recordTrade = async (btn) => {
-            const xauIn = document.getElementById('buy-xau');
-            const dateIn = document.getElementById('buy-date');
-            const xau = parseFloat(xauIn.value);
-            if(!xau || !currentPrice) return alert("Error: Check Price or Amount");
+        // --- FILTER LOGIC ---
+        window.updateFilter = (period, btn) => {
+            document.querySelectorAll('.filter-btn').forEach(b => { b.className = "filter-btn px-4 py-2 text-[10px] bg-gray-800 text-gray-400 rounded-xl font-black"; });
+            btn.className = "filter-btn px-4 py-2 text-[10px] bg-yellow-500 text-black rounded-xl font-black";
+            document.getElementById('custom-date-box').classList.add('hidden');
 
-            btn.disabled = true; btn.innerText = "SAVING...";
-            try {
-                await addDoc(collection(db, "trades"), {
-                    xau, totalAED: xau * currentPrice, priceAtTrade: currentPrice,
-                    timestamp: dateIn.value ? Timestamp.fromDate(new Date(dateIn.value)) : serverTimestamp()
-                });
-                xauIn.value = ''; dateIn.value = '';
-                alert("Saved!");
-            } catch (e) { alert(e.message); }
-            btn.disabled = false; btn.innerText = "CONFIRM PURCHASE";
+            const now = new Date();
+            let start;
+            if (period === '1d') start = new Date(now.getTime() - 24*60*60*1000);
+            else if (period === '7d') start = new Date(now.getTime() - 7*24*60*60*1000);
+            else if (period === '1m') start = new Date(now.setMonth(now.getMonth()-1));
+            else if (period === '1y') start = new Date(now.setFullYear(now.getFullYear()-1));
+            syncPriceData(start, new Date());
         };
 
-        // DATA SYNC
-        function initRealtime() {
-            onSnapshot(query(collection(db, "prices"), orderBy("timestamp", "desc"), limit(20)), (snap) => {
-                const list = document.getElementById('price-history-list');
-                list.innerHTML = '';
-                let gData = [], gLabels = [];
-                snap.docs.forEach((d, i) => {
-                    const data = d.data();
-                    if(i === 0) {
-                        currentPrice = data.price;
-                        document.getElementById('current-price-header').innerText = currentPrice.toLocaleString();
-                    }
-                    gData.unshift(data.price);
-                    gLabels.unshift(data.timestamp?.toDate().toLocaleDateString() || '');
-                    if(i < 8) {
-                        list.innerHTML += `<div class="bg-gray-800/50 p-3 rounded-xl flex justify-between border border-gray-800">
-                            <span class="text-[10px] text-gray-500 font-bold uppercase">${data.timestamp?.toDate().toLocaleString()}</span>
-                            <div class="flex gap-4 items-center">
-                                <span class="font-bold text-blue-400 font-mono">${data.price.toLocaleString()}</span>
-                                <button onclick="deleteDoc(doc(db, 'prices', '${d.id}'))" class="text-gray-600"><i class="fas fa-trash-alt text-xs"></i></button>
-                            </div>
-                        </div>`;
-                    }
-                });
-                updateChart(gLabels, gData);
-                updatePortfolioCalculations();
-            });
+        window.toggleCustomDate = () => document.getElementById('custom-date-box').classList.toggle('hidden');
+        window.applyCustomFilter = () => {
+            const s = new Date(document.getElementById('start-date').value);
+            const e = new Date(document.getElementById('end-date').value);
+            if(s && e) syncPriceData(s, e);
+        };
 
+        // --- DATA CORE ---
+        function initData() {
+            updateFilter('1d', document.querySelector('.filter-btn'));
             onSnapshot(query(collection(db, "trades"), orderBy("timestamp", "desc")), (snap) => {
                 const list = document.getElementById('sold-list');
-                list.innerHTML = '';
-                let totalX = 0, totalC = 0;
+                list.innerHTML = ''; let tX = 0, tC = 0;
                 snap.docs.forEach(d => {
-                    const data = d.data();
-                    const p = (data.xau * currentPrice) - data.totalAED;
-                    const pPct = (p / data.totalAED) * 100;
-                    totalX += data.xau; totalC += data.totalAED;
-                    list.innerHTML += `<div class="bg-gray-900 p-4 rounded-2xl border-l-4 ${p>=0?'border-green-500':'border-red-500'} shadow-md">
-                        <div class="flex justify-between items-start mb-2">
-                            <div>
-                                <p class="text-lg font-black text-yellow-500 font-mono">${data.xau} XAU</p>
-                                <p class="text-[10px] text-gray-500 font-bold uppercase">${data.timestamp?.toDate().toLocaleString()}</p>
-                            </div>
-                            <div class="flex gap-4">
-                                <button onclick="editTrade('${d.id}', ${data.xau})" class="text-blue-500"><i class="fas fa-edit"></i></button>
-                                <button onclick="deleteTrade('${d.id}')" class="text-red-500"><i class="fas fa-trash-alt"></i></button>
-                            </div>
+                    const data = d.data(); const isBuy = data.xau > 0;
+                    tX += data.xau; if(isBuy) tC += data.totalAED;
+                    list.innerHTML += `<div class="bg-gray-900 p-4 rounded-2xl border-l-4 ${isBuy?'border-green-500':'border-red-500'}">
+                        <div class="flex justify-between items-start">
+                            <div><p class="text-lg font-black ${isBuy?'text-green-500':'text-red-500'} font-mono">${Math.abs(data.xau)} XAU</p>
+                            <p class="text-[9px] text-gray-500 uppercase font-bold">${data.timestamp?.toDate().toLocaleString()}</p></div>
+                            <button onclick="deleteTrade('${d.id}')" class="text-gray-700 hover:text-red-500"><i class="fas fa-trash-alt"></i></button>
                         </div>
-                        <div class="flex justify-between items-center text-xs border-t border-gray-800 pt-2 mt-2">
-                            <span class="text-gray-500 uppercase font-bold text-[9px]">Vs Live Market:</span>
-                            <span class="${p>=0?'text-green-500':'text-red-500'} font-black">${p>=0?'▲':'▼'} ${Math.abs(p).toFixed(2)} AED (${pPct.toFixed(2)}%)</span>
+                        <div class="flex justify-between text-[10px] border-t border-gray-800 mt-2 pt-2 uppercase font-bold">
+                            <span>Rate: <span class="text-yellow-500">${data.priceAtTrade?.toLocaleString()}</span></span>
+                            <span>Total: <span class="text-white">${Math.abs(data.totalAED).toLocaleString()} AED</span></span>
                         </div>
                     </div>`;
                 });
-                window.cachedWallet = { totalX, totalC };
-                updatePortfolioCalculations();
+                updateWallet(tX, tC);
             });
         }
 
-        function updatePortfolioCalculations() {
-            if(!window.cachedWallet) return;
-            const { totalX, totalC } = window.cachedWallet;
-            document.getElementById('wallet-total-xau').innerText = totalX.toFixed(4) + " XAU";
-            document.getElementById('wallet-total-gram').innerText = (totalX * XAU_TO_GRAM).toFixed(2) + " g";
-            const val = totalX * currentPrice;
-            const p = val - totalC;
-            const pPct = totalC > 0 ? (p / totalC) * 100 : 0;
-            document.getElementById('profit-calc').innerHTML = `<div class="flex justify-between items-center">
-                <div><p class="text-2xl font-black font-mono">${val.toLocaleString(undefined,{minimumFractionDigits:2})} AED</p><p class="text-[9px] text-gray-500 font-bold uppercase tracking-widest">Initial Cost: ${totalC.toLocaleString()} AED</p></div>
-                <div class="text-right ${p>=0?'text-green-500':'text-red-500'}"><p class="text-xl font-black">${p>=0?'▲':'▼'} ${Math.abs(pPct).toFixed(2)}%</p><p class="text-[10px] font-bold">${p.toLocaleString()} AED</p></div>
-            </div>`;
+        function syncPriceData(start, end) {
+            if (priceUnsub) priceUnsub();
+            const q = query(collection(db, "prices"), where("timestamp", ">=", Timestamp.fromDate(start)), where("timestamp", "<=", Timestamp.fromDate(end)), orderBy("timestamp", "asc"));
+            priceUnsub = onSnapshot(q, (snap) => {
+                let gData = [], gLabels = [];
+                snap.docs.forEach(d => {
+                    const data = d.data(); gData.push(data.price);
+                    gLabels.push(data.timestamp?.toDate().toLocaleDateString([], {month:'short', day:'numeric', hour:'2-digit'}));
+                });
+                if(snap.docs.length > 0) {
+                    const latest = snap.docs[snap.docs.length-1].data().price;
+                    currentPrice = latest;
+                    document.getElementById('current-price-header').innerText = latest.toLocaleString();
+                }
+                updateChartUI(gLabels, gData);
+            }, (err) => console.log("Note: Create Firestore Index if link appears in console."));
         }
 
-        function updateChart(labels, data) {
+        function updateWallet(tX, tC) {
+            document.getElementById('wallet-total-xau').innerText = tX.toFixed(4) + " XAU";
+            document.getElementById('wallet-total-gram').innerText = (tX * XAU_TO_GRAM).toFixed(2) + " g";
+            const val = tX * currentPrice; const profit = val - tC;
+            const pPct = tC > 0 ? (profit/tC)*100 : 0;
+            document.getElementById('profit-calc').innerHTML = `<div class="flex justify-between items-center">
+                <div><p class="text-2xl font-black font-mono">${val.toLocaleString(undefined,{minimumFractionDigits:2})} AED</p><p class="text-[9px] text-gray-500 uppercase font-bold">Net Cost: ${tC.toLocaleString()}</p></div>
+                <div class="text-right ${profit>=0?'text-green-500':'text-red-500'}">
+                    <p class="text-xl font-black">${profit>=0?'▲':'▼'} ${Math.abs(pPct).toFixed(2)}%</p>
+                    <p class="text-[10px] font-bold">${Math.abs(profit).toLocaleString()} AED</p>
+                </div></div>`;
+        }
+
+        function updateChartUI(labels, data) {
             const ctx = document.getElementById('marketChart');
-            if (chart) { chart.data.labels = labels; chart.data.datasets[0].data = data; chart.update('none'); return; }
+            if (chart) { chart.data.labels = labels; chart.data.datasets[0].data = data; chart.update(); return; }
             chart = new Chart(ctx, {
                 type: 'line',
-                data: { labels, datasets: [{ data, borderColor: '#fbbf24', borderWidth: 2, tension: 0.3, pointRadius: 0, fill: true, backgroundColor: 'rgba(251,191,36,0.05)' }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, 
-                scales: { x: { display: false }, y: { grid: { color: '#1f2937' }, ticks: { color: '#4b5563', font: { size: 9 } } } } }
+                data: { labels, datasets: [{ data, borderColor: '#fbbf24', borderWidth: 3, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#fbbf24', fill: true, backgroundColor: 'rgba(251,191,36,0.1)' }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: '#4b5563', font: { size: 9 } } }, y: { grid: { color: '#1f2937' }, ticks: { color: '#4b5563', font: { size: 9 } } } } }
             });
         }
 
-        window.convertGold = () => { document.getElementById('buy-gram').innerText = (parseFloat(document.getElementById('buy-xau').value || 0) * XAU_TO_GRAM).toFixed(4); };
-        window.deleteTrade = async (id) => { if(confirm("Delete Trade?")) await deleteDoc(doc(db, "trades", id)); };
-        window.editTrade = async (id, old) => {
-            const nv = prompt("Enter new XAU amount:", old);
-            if(nv && !isNaN(nv)) await updateDoc(doc(db, "trades", id), { xau: parseFloat(nv), totalAED: parseFloat(nv) * currentPrice });
+        // --- ACTIONS ---
+        window.updatePrice = async (btn) => {
+            const p = parseFloat(document.getElementById('new-price').value);
+            const d = document.getElementById('price-date').value;
+            if(!p) return alert("Enter price"); btn.disabled = true;
+            await addDoc(collection(db, "prices"), { price: p, timestamp: d ? Timestamp.fromDate(new Date(d)) : serverTimestamp() });
+            document.getElementById('new-price').value = ''; btn.disabled = false;
         };
 
-        // ပိုမြန်အောင် window object ထဲထည့်ပေးခြင်း
+        window.recordTrade = async (btn) => {
+            const x = parseFloat(document.getElementById('trade-xau').value);
+            const d = document.getElementById('trade-date').value;
+            if(!x || !currentPrice) return alert("Check Details"); btn.disabled = true;
+            const finalX = tradeMode === 'buy' ? x : -x;
+            await addDoc(collection(db, "trades"), { xau: finalX, totalAED: finalX * currentPrice, priceAtTrade: currentPrice, timestamp: d ? Timestamp.fromDate(new Date(d)) : serverTimestamp() });
+            document.getElementById('trade-xau').value = ''; btn.disabled = false;
+        };
+
+        window.convertGold = () => document.getElementById('buy-gram').innerText = (parseFloat(document.getElementById('trade-xau').value || 0) * XAU_TO_GRAM).toFixed(4);
+        window.deleteTrade = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "trades", id)); };
+        
         window.db = db;
         window.doc = doc;
         window.deleteDoc = deleteDoc;
